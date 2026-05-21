@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bestimmung rosa blühender Pflanzen</title>
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  background: linear-gradient(to bottom right, #eef0ff, #efe6ff);
+  color: #FFC1C1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  background: #FF69B4;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+header h1 {
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+}
+
+.container {
+  display: flex;
+  flex: 1;
+  gap: 20px;
+  padding: 20px;
+}
+
+.main {
+  flex: 3;
+  background: white;
+  border-radius: 18px;
+  padding: 25px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+}
+
+.path {
+  flex: 1;
+  min-width: 260px;
+  background: #f5f3ff;
+  border-radius: 18px;
+  padding: 20px;
+  border-left: 6px solid #8d78ff;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+}
+
+.path h2 {
+  color: #5743b0;
+  margin-bottom: 15px;
+}
+
+.path ul {
+  list-style: none;
+}
+
+.path li {
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  border-left: 4px solid #7a61ff;
+}
+
+.question h2 {
+  margin-bottom: 20px;
+  color: #4f3ca0;
+}
+
+.options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: 0.25s;
+  border: 2px solid transparent;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  border-color: #7b63ff;
+}
+
+.card img {
+  width: 100%;
+  height: 220px;
+  object-fit: contain;
+  background: white;
+}
+
+.card-content {
+  padding: 15px;
+}
+
+.card-content h3 {
+  color: #4a379c;
+  margin-bottom: 10px;
+}
+
+.plant-card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.plant-card img {
+  width: 100%;
+  max-height: 550px;
+  object-fit: contain;
+  background: white;
+  border-radius: 14px;
+}
+
+.info-box {
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  border-left: 6px solid #7a61ff;
+}
+
+.info-box h2 {
+  margin-bottom: 15px;
+  color: #4f3ca0;
+}
+
+.info-box p {
+  margin-bottom: 10px;
+}
+
+.button-row {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 10px;
+  background: #5a4bb5;
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+button:hover {
+  background: #46369a;
+}
+
+footer {
+  text-align: center;
+  padding: 15px;
+  background: #ece8ff;
+}
+
+@media (max-width: 900px) {
+  .container {
+    flex-direction: column;
+  }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Bestimmung blau/violett blühender Pflanzen</h1>
+  <p>Biologie – Interaktiver Bestimmungsschlüssel</p>
+</header>
+
+<div class="container">
+  <main class="main">
+    <div id="app"></div>
+  </main>
+
+  <aside class="path">
+    <h2>Bestimmungsweg</h2>
+    <ul id="pathList"></ul>
+  </aside>
+</div>
+
+<footer>
+  Alle Bilder werden aus dem lokalen Ordner <strong>bilder</strong> geladen.
+</footer>
+
+<script>
+const plants = {
+  "Wiesenklee (Rotklee)": { familie: "Schmetterlingsblütengewächse", fundort: "Wiesen", bluetezeit: "Mai – Oktober", bild: "bilder/wiesenklee.jpg" },
+  "Zickzack-Klee": { familie: "Schmetterlingsblütengewächse", fundort: "Halbtrockenrasen", bluetezeit: "Juni-August", bild: "bilder/zickzack_klee.jpg" },
+  "Acker-Witwenblume": { familie: "Geißblattgewächse", fundort: "Wiesen", bluetezeit: "Juni-September", bild: "bilder/witwenblume.jpg" },
+  "Schlangenköterich": { familie: "Knöterichgewächse", fundort: "Feuchtwiesen, Bachränder", bluetezeit: "Mai-Juli", bild: "bilder/lupine.jpg" },
+  "Rote Taubnessel": { familie: "Lippenblütengewächse", fundort: "Wiesen", bluetezeit: "April – Oktober", bild: "bilder/Taubnessel.jpg" },
+  "Wald-Ziest": { familie: "Lippenblütengewächse", fundort: "Wald, Waldrand, Gebüsche", bluetezeit: "Juni-September", bild: "bilder/ziest.jpg" },
+  "Gemeine Ochsenzunge": { familie: "Raublattgewächse", fundort: "Wegränder", bluetezeit: "Mai – September", bild: "bilder/ochsenzunge.jpg" },
+  "Wald-Vergissmeinnicht": { familie: "Raublattgewächse", fundort: "Wälder", bluetezeit: "April – Juli", bild: "bilder/vergissmeinnicht.jpg" },
+  "Futter-Beinwell": { familie: "Raublattgewächse", fundort: "Feuchte Wiesen", bluetezeit: "Mai – August", bild: "bilder/beinwell.jpg" },
+  "Gewöhnlicher Natternkopf": { familie: "Raublattgewächse", fundort: "Trockene Wiesen", bluetezeit: "Juni – September", bild: "bilder/natternkopf.jpg" },
+  "Rundblättrige Glockenblume": { familie: "Glockenblumengewächse", fundort: "Wiesen", bluetezeit: "Juni – September", bild: "bilder/rundblaettrige_glockenblume.jpg" },
+  "Rapunzel-Glockenblume": { familie: "Glockenblumengewächse", fundort: "Wiesen", bluetezeit: "Juni – August", bild: "bilder/rapunzel_glockenblume.jpg" },
+  "Pfirsichblättrige Glockenblume": { familie: "Glockenblumengewächse", fundort: "Waldränder", bluetezeit: "Juni – August", bild: "bilder/pfirsichblaettrige_glockenblume.jpg" },
+  "Nesselblättrige Glockenblume": { familie: "Glockenblumengewächse", fundort: "Wälder", bluetezeit: "Juni – September", bild: "bilder/nesselblaettrige_glockenblume.jpg" },
+  "Ruprechtskraut": { familie: "Storchschnabelgewächse", fundort: "Wälder", bluetezeit: "Mai – Oktober", bild: "bilder/ruprechtskraut.jpg" },
+  "Purpur-Storchschnabel": { familie: "Storchschnabelgewächse", fundort: "Waldränder", bluetezeit: "Mai – Juli", bild: "bilder/purpur_storchschnabel.jpg" },
+  "Wald-Storchschnabel": { familie: "Storchschnabelgewächse", fundort: "Wälder", bluetezeit: "Juni – August", bild: "bilder/wald_storchschnabel.jpg" },
+  "Pyrenäen-Storchschnabel": { familie: "Storchschnabelgewächse", fundort: "Wiesen", bluetezeit: "Juni – September", bild: "bilder/pyrenaeen_storchschnabel.jpg" },
+  "Wiesen-Storchschnabel": { familie: "Storchschnabelgewächse", fundort: "Feuchte Wiesen", bluetezeit: "Mai – September", bild: "bilder/wiesen_storchschnabel.jpg" },
+  "Kornblume": { familie: "Korbblütengewächse", fundort: "Äcker", bluetezeit: "Juni – September", bild: "bilder/kornblume.jpg" },
+  "Kriechender Günsel": { familie: "Lippenblütler", fundort: "Wiesen", bluetezeit: "April – Juni", bild: "bilder/guensel.jpg" },
+  "Kleine Braunelle": { familie: "Lippenblütler", fundort: "Wiesen", bluetezeit: "Juni – September", bild: "bilder/braunelle.jpg" },
+  "Wiesensalbei": { familie: "Lippenblütler", fundort: "Trockene Wiesen", bluetezeit: "Mai – Juli", bild: "bilder/wiesensalbei.jpg" },
+  "Acker-Witwenblume": { familie: "Geißblattgewächse", fundort: "Wiesen", bluetezeit: "Juni – September", bild: "bilder/witwenblume.jpg" },
+  "Bastard-Luzerne": { familie: "Hülsenfrüchtler", fundort: "Wiesen", bluetezeit: "Juni – August", bild: "bilder/luzerne.jpg" },
+  "Schwarze Teufelskralle": { familie: "Wegerichgewächse", fundort: "Wiesen", bluetezeit: "Juni – September", bild: "bilder/teufelskralle.jpg" }
+};
+
+const path = [];
+const historyStack = [];
+
+function updatePath() {
+  const list = document.getElementById('pathList');
+  list.innerHTML = '';
+
+  path.forEach(step => {
+    const li = document.createElement('li');
+    li.textContent = step;
+    list.appendChild(li);
+  });
+}
+
+function addPath(step) {
+  path.push(step);
+  updatePath();
+}
+
+function saveState() {
+  historyStack.push({
+    html: document.getElementById('app').innerHTML,
+    path: [...path]
+  });
+}
+
+function goBack() {
+  if(historyStack.length > 0) {
+    const state = historyStack.pop();
+    document.getElementById('app').innerHTML = state.html;
+    path.length = 0;
+    state.path.forEach(p => path.push(p));
+    updatePath();
+  }
+}
+
+function resetApp() {
+  path.length = 0;
+  historyStack.length = 0;
+  updatePath();
+  showMainQuestion();
+}
+
+function createOption(title, img, text, action) {
+  return `
+    <div class="card" onclick="${action}">
+      <img src="${img}" alt="${title}">
+      <div class="card-content">
+        <h3>${title}</h3>
+        <p>${text}</p>
+      </div>
+    </div>
+  `;
+}
+
+function showMainQuestion() {
+  document.getElementById('app').innerHTML = `
+    <div class="question">
+      <h2>1. Welche Blütenform besitzt die Pflanze?</h2>
+      <div class="options">
+        ${createOption('Einzelblüte', 'bilder/einzelbluete.jpg', 'Einzelne auffällige Blüte', 'selectSingleFlower()')}
+        ${createOption('Lippenblüte', 'bilder/lippenbluete.jpg', 'Blüte mit Ober- und Unterlippe', 'selectLipFlower()')}
+        ${createOption('Zusammengesetzte Blüte', 'bilder/zusammengesetzt.jpg', 'Blütenstand aus vielen Einzelblüten', 'selectCompositeFlower()')}
+      </div>
+    </div>
+  `;
+}
+
+function selectSingleFlower() {
+  saveState();
+  addPath('Blütenform: Einzelblüte');
+
+  document.getElementById('app').innerHTML = `
+    <div class="question">
+      <h2>2. Wie viele Kronblätter besitzt die Blüte?</h2>
+      <div class="options">
+        ${createOption('Vier unsymmetrische Kronblätter', 'bilder/vier_unsymmetrisch.jpg', 'Unregelmäßige Form der Kronblätter', "showPlantSelection(['Zaunwicke','Vogel-Wicke','Bunte Kronwicke','Staudenlupine'])")}
+
+        ${createOption('Vier symmetrische Kronblätter', 'bilder/vier_symmetrisch.jpg', 'Vier gleichmäßige Kronblätter', "showPlantSelection(['Gamander-Ehrenpreis'])")}
+
+        ${createOption('Fünf Kronblätter', 'bilder/fuenf.jpg', 'Fünf deutlich erkennbare Kronblätter', "showPlantSelection(['Duftveilchen','Gemeine Ochsenzunge','Wald-Vergissmeinnicht','Futter-Beinwell','Gewöhnlicher Natternkopf','Rundblättrige Glockenblume','Rapunzel-Glockenblume','Pfirsichblättrige Glockenblume','Nesselblättrige Glockenblume','Ruprechtskraut','Purpur-Storchschnabel','Wald-Storchschnabel','Pyrenäen-Storchschnabel','Wiesen-Storchschnabel'])")}
+
+        ${createOption('Viele Kronblätter', 'bilder/viele.jpg', 'Viele kleine Kronblätter oder Röhrenblüten', "showPlantSelection(['Kornblume'])")}
+      </div>
+    </div>
+  `;
+}
+
+function selectLipFlower() {
+  saveState();
+  addPath('Blütenform: Lippenblüte');
+
+  showPlantSelection([
+    'Rote Taubnessel',
+    'Wald-Ziest,
+    'Roter Fingerhut'
+'Feld-Thymian‘
+'Gewöhnlicher Dost (Oregano)
+  ]);
+}
+
+function selectCompositeFlower() {
+  saveState();
+  addPath('Blütenform: Zusammengesetzte Blüte');
+
+  document.getElementById('app').innerHTML = `
+    <div class="question">
+      <h2>2. Welcher Blütenstand liegt vor?</h2>
+      <div class="options">
+        ${createOption('Blüten mit Köpfchen', 'bilder/koepfchen.jpg', 'Dicht stehende Einzelblüten', "showPlantSelection(['Acker-Witwenblume','Bastard-Luzerne'])")}
+
+        ${createOption('Ähren / Scheinähren', 'bilder/aehren.jpg', 'Blüten entlang einer Achse', "showPlantSelection(['Schwarze Teufelskralle'])")}
+      </div>
+    </div>
+  `;
+}
+
+function showPlantSelection(plantNames) {
+  saveState();
+  addPath('Pflanzenauswahl');
+
+  let html = `
+    <div class="question">
+      <h2>3. Wähle die passende Pflanze aus</h2>
+      <p style="margin-bottom:20px; color:#5a4bb5; font-weight:bold;">
+        Klicke auf Bild oder Namen für weitere Informationen.
+      </p>
+      <div class="options">
+  `;
+
+  plantNames.forEach(name => {
+    html += createOption(name, plants[name].bild, '', `showPlantCard('${name}')`);
+  });
+
+  html += '</div></div>';
+
+  document.getElementById('app').innerHTML = html;
+}
+
+function showPlantCard(name) {
+  saveState();
+  addPath('Bestimmte Pflanze: ' + name);
+
+  const plant = plants[name];
+
+  document.getElementById('app').innerHTML = `
+    <div class="plant-card">
+      <div class="info-box">
+        <h2>${name}</h2>
+        <p><strong>Familie:</strong> ${plant.familie}</p>
+        <p><strong>Fundort:</strong> ${plant.fundort}</p>
+        <p><strong>Blütezeit:</strong> ${plant.bluetezeit}</p>
+      </div>
+
+      <img src="${plant.bild}" alt="${name}">
+
+      <div class="button-row">
+        <button onclick="goBack()">Zurück</button>
+        <button onclick="resetApp()">Neue Bestimmung starten</button>
+      </div>
+    </div>
+  `;
+}
+
+showMainQuestion();
+</script>
+
+</body>
+</html>
