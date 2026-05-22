@@ -1,1 +1,0 @@
-# pflanzenbestimmung-rosa-rot
